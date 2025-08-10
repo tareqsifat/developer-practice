@@ -34,13 +34,20 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-// Public routes
+// Auth Routes
 Route::prefix('auth')->group(function () {
+    // Public Auth Routes
     Route::post('register', [AuthController::class, 'register']);
     Route::post('login', [AuthController::class, 'login']);
     Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
     Route::post('reset-password', [AuthController::class, 'resetPassword']);
     Route::post('verify-email', [AuthController::class, 'verifyEmail']);
+    // Protected Auth Routes
+    Route::middleware('auth:api')->group(function () {
+        Route::post('logout', [AuthController::class, 'logout']);
+        Route::get('user', [AuthController::class, 'user']);
+        Route::post('refresh', [AuthController::class, 'refresh']);
+    });
 });
 
 // Public content routes
@@ -51,14 +58,6 @@ Route::get('testimonials/featured', [TestimonialController::class, 'featured']);
 
 // Protected routes
 Route::middleware('auth:api')->group(function () {
-
-    // Authentication routes
-    Route::prefix('auth')->group(function () {
-        Route::post('logout', [AuthController::class, 'logout']);
-        Route::get('user', [AuthController::class, 'user']);
-        Route::post('refresh', [AuthController::class, 'refresh']);
-    });
-
     // User management
     Route::prefix('user')->group(function () {
         Route::get('profile', [UserController::class, 'profile']);
@@ -115,8 +114,23 @@ Route::middleware('auth:api')->group(function () {
         Route::post('{id}/calendar', [InterviewController::class, 'addToCalendar']);
     });
 
+    // Blog Routes
+    Route::apiResource('blog', BlogController::class)->except(['index', 'show']);
+    Route::post('blog/{post}/comments', [BlogController::class, 'addComment']);
+    Route::post('blog/{post}/like', [BlogController::class, 'toggleLike']);
+
+    // Points Routes
+    Route::get('points', [PointController::class, 'index']);
+    Route::post('points/purchase', [PointController::class, 'purchasePoints']);
+    Route::post('points/reward', [PointController::class, 'rewardPoints'])->middleware('can:reward-points');
+
+    // Points Routes
+    Route::get('streaks', [StreakController::class, 'index']);
+    Route::get('streaks/current', [StreakController::class, 'current']);
+
+
     // Admin routes
-    Route::middleware('can:access-admin')->prefix('admin')->group(function () {
+    Route::middleware('admin')->prefix('admin')->group(function () {
 
         // Stack management
         Route::apiResource('stacks', StackController::class)->except(['index', 'show']);
@@ -158,21 +172,6 @@ Route::middleware('auth:api')->group(function () {
         Route::get('analytics/exams', [DashboardController::class, 'examAnalytics']);
         Route::get('analytics/questions', [DashboardController::class, 'questionAnalytics']);
     });
-});
-Route::apiResource('blog', BlogController::class)->only(['index', 'show']);
-Route::middleware('auth:api')->group(function () {
-    Route::apiResource('blog', BlogController::class)->except(['index', 'show']);
-    Route::post('blog/{post}/comments', [BlogController::class, 'addComment']);
-    Route::post('blog/{post}/like', [BlogController::class, 'toggleLike']);
-});
-Route::middleware('auth:api')->group(function () {
-    Route::get('points', [PointController::class, 'index']);
-    Route::post('points/purchase', [PointController::class, 'purchasePoints']);
-    Route::post('points/reward', [PointController::class, 'rewardPoints'])->middleware('can:reward-points');
-});
-Route::middleware('auth:api')->group(function () {
-    Route::get('streaks', [StreakController::class, 'index']);
-    Route::get('streaks/current', [StreakController::class, 'current']);
 });
 // Add to routes/api.php
 Route::prefix('webhooks')->group(function () {
