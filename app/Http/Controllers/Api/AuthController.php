@@ -59,5 +59,69 @@ class AuthController extends Controller
         return response()->json($request->user()->load('profile'));
     }
 
-    // Implement other methods: forgotPassword, resetPassword, verifyEmail
+    /**
+     * Send a password reset link to the user's email.
+    */
+    public function forgotPassword(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email|exists:users,email',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
+        try {
+            $this->authService->sendPasswordResetLink($request->email);
+            return response()->json(['message' => 'Password reset link sent successfully.']);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 400);
+        }
+    }
+
+    /**
+     * Reset the user's password.
+     */
+    public function resetPassword(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'token'    => 'required|string',
+            'email'    => 'required|email|exists:users,email',
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+        $request_items = $request->all();
+
+        try {
+            $this->authService->resetPassword($request_items['token'], $request_items['email'], $request_items['password']);
+            return response()->json(['message' => 'Password has been reset successfully.']);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 400);
+        }
+    }
+
+    /**
+     * Verify the user's email address.
+     */
+    public function verifyEmail(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'token' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
+        try {
+            $this->authService->verifyEmail($request->token);
+            return response()->json(['message' => 'Email verified successfully.']);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 400);
+        }
+    }
 }

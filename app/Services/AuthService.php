@@ -2,11 +2,14 @@
 
 namespace App\Services;
 
+use App\Events\SendEmailEvent;
 use App\Models\User;
+use App\Models\VerificationOtp;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 
 class AuthService extends BaseService
@@ -41,11 +44,12 @@ class AuthService extends BaseService
 
         // Assign default role
         // $user->assignRole($user->role);
-
-        $tokenResult = $this->createToken($user);
+        $tokenName = 'DevPractice-' . $user->id . '-' . time();
+        $verification_otp = (new OtpService)->generateOtp($user, VerificationOtp::EMAIL_VERIFICATION);
+        event(new SendEmailEvent($user, $verification_otp));
         return [
             'user' => $user->load('profile'),
-            'token' => $tokenResult['token'],
+            'token' => $token = $user->createToken($tokenName),
             'expires_at' => $tokenResult['expires_at'],
         ];
     }
@@ -93,7 +97,6 @@ class AuthService extends BaseService
             $scopes[] = 'contributor';
         }
 
-        $token = $user->createToken($tokenName);
 
         return [
             'token' => $token->accessToken,
