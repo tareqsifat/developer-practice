@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\HasApiTokens;
@@ -24,6 +25,30 @@ class User extends Authenticatable
         'linkedin_url',
         'website_url',
     ];
+    public const ROLE_ADMIN    = 'ADMIN';
+    public const ROLE_MODERATOR = 'MODIFIER';
+    public const ROLE_USER     = 'USER';
+
+    public const ROLES = [
+        1 => self::ROLE_ADMIN,
+        2 => self::ROLE_MODERATOR,
+        3 => self::ROLE_USER,
+    ];
+
+    // When getting role from DB → convert number to name
+    public function getRoleAttribute($value)
+    {
+        return self::ROLES[$value] ?? null;
+    }
+
+    // When setting role → allow passing constant and store as number
+    public function setRoleAttribute($value)
+    {
+        if (is_string($value)) {
+            $value = array_search(strtoupper($value), self::ROLES);
+        }
+        $this->attributes['role'] = $value;
+    }
 
     protected $hidden = [
         'password',
@@ -174,6 +199,10 @@ class User extends Authenticatable
                     ->using(InterviewParticipant::class)
                     ->withPivot('joined_at', 'left_at', 'role')
                     ->withTimestamps();
+    }
+    public function verificationOtps(): MorphMany
+    {
+        return $this->morphMany(VerificationOtp::class, 'verifiable');
     }
 }
 
