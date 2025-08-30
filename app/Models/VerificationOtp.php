@@ -36,7 +36,8 @@ class VerificationOtp extends Model
     protected $fillable = [
         'otp',
         'verification_type',
-        'expires_at'
+        'expires_at',
+        'token'
     ];
 
     protected $casts = [

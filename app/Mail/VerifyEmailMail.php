@@ -10,13 +10,16 @@ use Illuminate\Mail\Mailables\Envelope;
 class VerifyEmailMail extends Mailable
 {
     public $user;
+    public $otp;
     public $token;
+
     /**
      * Create a new message instance.
      */
-    public function __construct(User $user, string $token)
+    public function __construct(User $user, string $otp, string $token)
     {
         $this->user = $user;
+        $this->otp = $otp;
         $this->token = $token;
     }
 

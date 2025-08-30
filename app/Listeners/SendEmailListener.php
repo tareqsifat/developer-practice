@@ -4,7 +4,9 @@ namespace App\Listeners;
 
 use App\Events\SendEmailEvent;
 use App\Factories\MailFactory;
+use App\Models\VerificationOtp;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Support\Facades\Log;
 
 class SendEmailListener implements ShouldQueue
 {
@@ -23,6 +25,6 @@ class SendEmailListener implements ShouldQueue
      */
     public function handle(SendEmailEvent $event): void
     {
-        $this->mailFactory->send($event->verification_otp, $event->user);
+        $this->mailFactory->send($event->user, $event->verification_otp, $event->type);
     }
 }

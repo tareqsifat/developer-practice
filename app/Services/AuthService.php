@@ -46,11 +46,10 @@ class AuthService extends BaseService
         // $user->assignRole($user->role);
         $tokenName = 'DevPractice-' . $user->id . '-' . time();
         $verification_otp = (new OtpService)->generateOtp($user, VerificationOtp::EMAIL_VERIFICATION);
-        event(new SendEmailEvent($user, $verification_otp));
+        event(new SendEmailEvent($user, $verification_otp, VerificationOtp::EMAIL_VERIFICATION));
         return [
             'user' => $user->load('profile'),
-            'token' => $token = $user->createToken($tokenName),
-            'expires_at' => $tokenResult['expires_at'],
+            'token' => $user->createToken($tokenName)->accessToken
         ];
     }
 
@@ -69,40 +68,39 @@ class AuthService extends BaseService
             throw new \Exception('Account is deactivated');
         }
 
-        $tokenResult = $this->createToken($user);
+        // $tokenResult = $this->createToken($user);
 
         // Update last login
         $user->update(['last_login_at' => now()]);
-
+        $tokenName = 'DevPractice-' . $user->id . '-' . time();
         return [
             'user' => $user->load('profile'),
-            'token' => $tokenResult['token'],
-            'expires_at' => $tokenResult['expires_at'],
+            'token' => $user->createToken($tokenName)->accessToken
         ];
     }
 
     /**
      * Create access token for user
      */
-    public function createToken(User $user): array
-    {
-        $tokenName = 'DevPractice-' . $user->id . '-' . time();
+    // public function createToken(User $user): array
+    // {
+    //     $tokenName = 'DevPractice-' . $user->id . '-' . time();
 
-        // Define scopes based on user role
-        $scopes = ['user'];
-        if ($user->role === 'admin') {
-            $scopes[] = 'admin';
-        }
-        if (in_array($user->role, ['admin', 'contributor'])) {
-            $scopes[] = 'contributor';
-        }
+    //     // Define scopes based on user role
+    //     $scopes = ['user'];
+    //     if ($user->role === 'admin') {
+    //         $scopes[] = 'admin';
+    //     }
+    //     if (in_array($user->role, ['admin', 'contributor'])) {
+    //         $scopes[] = 'contributor';
+    //     }
 
 
-        return [
-            'token' => $token->accessToken,
-            'expires_at' => $token->token->expires_at,
-        ];
-    }
+    //     return [
+    //         'token' => $token->accessToken,
+    //         'expires_at' => $token->token->expires_at,
+    //     ];
+    // }
 
     /**
      * Verify email address

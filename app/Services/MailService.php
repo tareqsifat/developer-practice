@@ -3,33 +3,24 @@ namespace App\Services;
 
 use App\Mail\VerifyEmailMail;
 use App\Models\User;
+use App\Models\VerificationOtp;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Str;
+use stdClass;
 
 class MailService
 {
-    public function sendVerificationEmail(User $user): void
+    public function sendVerificationEmail(User $user, VerificationOtp $verification_otp): void
     {
-        $token = Str::random(64);
-
-        $user->update([
-            'email_verification_token' => $token,
-        ]);
-
-        Mail::to($user->email)->send(new VerifyEmailMail($user, $token));
+        $otp = $verification_otp->otp;
+        $token = $verification_otp->token;
+        Mail::to($user->email)->send(new VerifyEmailMail($user,$otp, $token));
     }
 
-    public function sendPasswordResetEmail(User $user): void
+    public function sendPasswordResetEmail(User $user, VerificationOtp $verification_otp): void
     {
-        $token = Str::random(64);
+        $otp = $verification_otp->otp;
+        $token = $verification_otp->token;
 
-        $user->update([
-            'password_reset_token' => $token,
-        ]);
-
-        Mail::send('emails.password-reset', ['token' => $token], function ($message) use ($user) {
-            $message->to($user->email);
-            $message->subject('Password Reset Request');
-        });
+        Mail::to($user->email)->send(new VerifyEmailMail($user, $otp, $token));
     }
 }

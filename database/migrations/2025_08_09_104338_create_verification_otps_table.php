@@ -14,8 +14,9 @@ return new class extends Migration
         Schema::create('verification_otps', function (Blueprint $table) {
             $table->id();
             $table->string('otp', 10);
+            $table->string('token', 40);
             $table->integer('verification_type'); // e.g., 'email', 'phone'
-            $table->timestamp('expires_at');
+            $table->datetime('expires_at');
             $table->morphs('verifiable'); // Creates verifiable_id + verifiable_type
             $table->timestamps();
         });
