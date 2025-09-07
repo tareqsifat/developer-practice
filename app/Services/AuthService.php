@@ -80,10 +80,11 @@ class AuthService extends BaseService
     /**
      * Verify email address
      */
-    public function verifyEmail(string $token): bool
+    public function verifyEmail(string $otp, $type, $token): bool
     {
         // In a real implementation, you would store verification tokens
         // and validate them here. For simplicity, we'll just mark as verified.
+        $otp_service =(new  OtpService)->verifyOtp($otp, $type, $token);
 
         $user = User::where('email_verification_token', $token)->first();
 
@@ -92,8 +93,7 @@ class AuthService extends BaseService
         }
 
         $user->update([
-            'email_verified_at' => now(),
-            'email_verification_token' => null,
+            'email_verified_at' => now()
         ]);
 
         return true;
