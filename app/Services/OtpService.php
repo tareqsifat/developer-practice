@@ -5,10 +5,12 @@ use App\Models\VerificationOtp;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Http\JsonResponse;
 
 class OtpService
 {
-    public function generateOtp(Model $verifiable, string $type, int $minutes = 10): VerificationOtp
+
+    public function generateOtp(Model $verifiable, string $type, int $minutes = 10)
     {
         $numericType = (new VerificationOtp)->getVerificationTypeAttribute($type);
         $verifiable->verificationOtps()
@@ -23,19 +25,27 @@ class OtpService
         ]);
     }
 
-    public function verifyOtp(Model $verifiable, string $otp, string $type): bool
+    public function verifyOtp(string $otp, string $type, string $token): array
     {
-        $otpRecord = $verifiable->verificationOtps()
-            ->where('otp', $otp)
+        $otpRecord = VerificationOtp::where(function ($query) use ($otp, $token) {
+            $query->where('otp', $otp)
+                ->orWhere('token', $token);
+            })
             ->where('verification_type', $type)
-            ->where('expires_at', '>', now())
             ->first();
 
-        if ($otpRecord) {
-            $otpRecord->delete();
-            return true;
+        if (!$otpRecord || $otpRecord->expires_at < now()) {
+            return [
+                'success' => false,
+                'message' => 'OTP is invalid or expired.',
+            ];
         }
 
-        return false;
+
+        return [
+            'success' => true,
+            'message' => 'OTP verified successfully.',
+            'otp' => $otpRecord,
+        ];
     }
 }
