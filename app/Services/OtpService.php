@@ -12,14 +12,14 @@ class OtpService
 
     public function generateOtp(Model $verifiable, string $type, int $minutes = 10)
     {
-        $numericType = (new VerificationOtp)->getVerificationTypeAttribute($type);
+        $numericType = VerificationOtp::getTypeCode($type);
         $verifiable->verificationOtps()
             ->where('verification_type', $numericType)
             ->delete();
 
         return $verifiable->verificationOtps()->create([
             'otp' => rand(100000, 999999), // 6-digit OTP
-            'verification_type' => $type,
+            'verification_type' => $numericType,
             'expires_at' => Carbon::now()->addMinutes($minutes)->toDateTimeString(),
             'token' => bin2hex(random_bytes(20)), // 40 hex chars (~39+ chars)
         ]);
@@ -27,6 +27,12 @@ class OtpService
 
     public function verifyOtp(string $otp, string $type, string $token): array
     {
+        if(empty($otp) && empty($token)){
+            return [
+                'success' => false,
+                'message' => 'OTP or Token is required',
+            ];
+        }
         $otpRecord = VerificationOtp::where(function ($query) use ($otp, $token) {
             $query->where('otp', $otp)
                 ->orWhere('token', $token);

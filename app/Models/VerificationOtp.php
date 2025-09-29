@@ -48,4 +48,9 @@ class VerificationOtp extends Model
     {
         return $this->morphTo();
     }
+
+    public static function getTypeCode(string $type): ?int
+    {
+        return array_search($type, self::VERIFICATION_TYPE, true) ?: null;
+    }
 }

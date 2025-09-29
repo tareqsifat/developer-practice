@@ -84,8 +84,13 @@ class AuthService extends BaseService
     {
         // In a real implementation, you would store verification tokens
         // and validate them here. For simplicity, we'll just mark as verified.
-        $otp_service =(new  OtpService)->verifyOtp($otp, $type, $token);
 
+        $numaricType = VerificationOtp::getTypeCode($type);
+        $otp_service = (new  OtpService)->verifyOtp($otp, $numaricType, $token);
+
+        if($otp_service['success'] == false){
+            return false;
+        }
         $user = User::where('email_verification_token', $token)->first();
 
         if (!$user) {

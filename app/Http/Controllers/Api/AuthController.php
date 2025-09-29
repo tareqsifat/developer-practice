@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Services\AuthService;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\VerificationOtp;
 use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
@@ -110,7 +111,8 @@ class AuthController extends Controller
     public function verifyEmail(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'token' => 'required|string',
+            'token' => 'sometimes|string|max:50',
+            'otp' => 'sometimes|numeric|max_digits:10'
         ]);
 
         if ($validator->fails()) {
@@ -118,8 +120,14 @@ class AuthController extends Controller
         }
 
         try {
-            $this->authService->verifyEmail($request->token);
-            return response()->json(['message' => 'Email verified successfully.']);
+            $otp = $request->otp;
+            $token = $request->token;
+            $verify_status = $this->authService->verifyEmail($otp, VerificationOtp::EMAIL_VERIFICATION, $token);
+            if($verify_status){
+                return response()->json(['message' => 'Email verified successfully.']);
+            } else {
+                return response()->json(['message' => 'Something went wrong'], 422);
+            }
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
