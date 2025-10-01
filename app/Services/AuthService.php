@@ -80,7 +80,7 @@ class AuthService extends BaseService
     /**
      * Verify email address
      */
-    public function verifyEmail(string $otp, $type, $token): bool
+    public function verifyEmail($type, $token, $otp = null): bool
     {
         // In a real implementation, you would store verification tokens
         // and validate them here. For simplicity, we'll just mark as verified.

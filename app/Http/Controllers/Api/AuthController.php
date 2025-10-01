@@ -121,7 +121,7 @@ class AuthController extends Controller
 
         try {
             $otp = $request->otp;
-            $token = $request->token;
+            $token = $request->token ?? "";
             $verify_status = $this->authService->verifyEmail($otp, VerificationOtp::EMAIL_VERIFICATION, $token);
             if($verify_status){
                 return response()->json(['message' => 'Email verified successfully.']);
