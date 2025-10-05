@@ -9,8 +9,10 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
+use Symfony\Component\VarDumper\VarDumper;
 
 class AuthService extends BaseService
 {
@@ -80,18 +82,19 @@ class AuthService extends BaseService
     /**
      * Verify email address
      */
-    public function verifyEmail($type, $token, $otp = null): bool
+    public function verifyEmail($type, $token = null, $otp = null): bool
     {
+        Log::info('token: ' . $token . '$otp: ' . $otp . 'type: ' . $type);
         // In a real implementation, you would store verification tokens
         // and validate them here. For simplicity, we'll just mark as verified.
 
         $numaricType = VerificationOtp::getTypeCode($type);
-        $otp_service = (new  OtpService)->verifyOtp($otp, $numaricType, $token);
-
+        $otp_service = (new  OtpService)->verifyOtp($numaricType, $token, $otp, );
         if($otp_service['success'] == false){
+            Log::info('False return from Otp Service'. $otp_service['success']);
             return false;
         }
-        $user = User::where('email_verification_token', $token)->first();
+        $user = User::find(auth()->user()->id);
 
         if (!$user) {
             return false;
