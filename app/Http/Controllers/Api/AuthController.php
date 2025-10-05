@@ -122,11 +122,11 @@ class AuthController extends Controller
         try {
             $otp = $request->otp;
             $token = $request->token ?? "";
-            $verify_status = $this->authService->verifyEmail($otp, VerificationOtp::EMAIL_VERIFICATION, $token);
+            $verify_status = $this->authService->verifyEmail(VerificationOtp::EMAIL_VERIFICATION,$token, $otp );
             if($verify_status){
                 return response()->json(['message' => 'Email verified successfully.']);
             } else {
-                return response()->json(['message' => 'Something went wrong'], 422);
+                return response()->json(['message' => 'Failed To varify email.'], 422);
             }
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 400);
