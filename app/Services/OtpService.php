@@ -1,11 +1,13 @@
 <?php
 namespace App\Services;
 
+use App\Models\User;
 use App\Models\VerificationOtp;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\JsonResponse;
+use Symfony\Component\VarDumper\VarDumper;
 
 class OtpService
 {
@@ -25,7 +27,7 @@ class OtpService
         ]);
     }
 
-    public function verifyOtp(string $otp, string $type, string $token): array
+    public function verifyOtp(string $type, $token = null, $otp = null ): array
     {
         if(empty($otp) && empty($token)){
             return [
@@ -33,14 +35,19 @@ class OtpService
                 'message' => 'OTP or Token is required',
             ];
         }
-        $otpRecord = VerificationOtp::where(function ($query) use ($otp, $token) {
+        Log::info('In OTP servicw: token: ' . $token . ' otp: ' . $otp . ' type: ' . $type);
+        $user = User::find(auth()->id());
+        $otpRecord = $user->verificationOtps()->where(function ($query) use ($otp, $token) {
             $query->where('otp', $otp)
                 ->orWhere('token', $token);
             })
             ->where('verification_type', $type)
             ->first();
 
-        if (!$otpRecord || $otpRecord->expires_at < now()) {
+        $is_passed = (string) $otpRecord->expires_at < now();
+
+        if (empty($otpRecord) || $otpRecord->expires_at < now()) {
+            Log::info('expires_at: '. $otpRecord->expires_at . ' Now: '. now() . ' is time passed ' . $is_passed);
             return [
                 'success' => false,
                 'message' => 'OTP is invalid or expired.',
