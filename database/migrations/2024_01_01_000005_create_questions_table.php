@@ -29,7 +29,7 @@ return new class extends Migration
             $table->text('rejection_reason')->nullable();
             $table->timestamps();
             $table->softDeletes();
-            
+
             $table->index(['stack_id', 'subject_id', 'topic_id']);
             $table->index(['is_approved', 'difficulty']);
             $table->index(['user_id', 'is_approved']);
