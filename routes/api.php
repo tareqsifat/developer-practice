@@ -133,10 +133,10 @@ Route::middleware('auth:api')->group(function () {
     Route::middleware('admin')->prefix('admin')->group(function () {
 
         // Stack management
-        Route::apiResource('stacks', StackController::class)->except(['index', 'show']);
+        Route::apiResource('stacks', StackController::class);
 
         // Subject management
-        Route::apiResource('subjects', SubjectController::class)->except(['index', 'show']);
+        Route::apiResource('subjects', SubjectController::class);
 
         // Topic management
         Route::apiResource('topics', TopicController::class)->except(['index', 'show']);
