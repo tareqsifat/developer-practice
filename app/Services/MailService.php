@@ -9,18 +9,18 @@ use stdClass;
 
 class MailService
 {
-    public function sendVerificationEmail(User $user, VerificationOtp $verification_otp): void
+    public function sendVerificationEmail(User $user, VerificationOtp $verification_otp, int $type): void
     {
         $otp = $verification_otp->otp;
         $token = $verification_otp->token;
-        Mail::to($user->email)->send(new VerifyEmailMail($user,$otp, $token));
+        Mail::to($user->email)->send(new VerifyEmailMail($user,$otp, $token, $type));
     }
 
-    public function sendPasswordResetEmail(User $user, VerificationOtp $verification_otp): void
+    public function sendPasswordResetEmail(User $user, VerificationOtp $verification_otp, int $type): void
     {
         $otp = $verification_otp->otp;
         $token = $verification_otp->token;
 
-        Mail::to($user->email)->send(new VerifyEmailMail($user, $otp, $token));
+        Mail::to($user->email)->send(new VerifyEmailMail($user, $otp, $token, $type));
     }
 }
