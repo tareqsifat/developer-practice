@@ -122,21 +122,19 @@ class AuthService extends BaseService
     /**
      * Reset password
      */
-    public function resetPassword(string $token, string $email, string $password): bool
+    public function resetPassword(string $email, string $password,string $type,  $token = null, $otp = null): bool
     {
-        $status = Password::reset([
-            'email' => $email,
-            'password' => $password,
-            'password_confirmation' => $password,
-            'token' => $token,
-        ], function ($user, $password) {
-            $user->forceFill([
-                'password' => Hash::make($password),
-                'remember_token' => Str::random(60),
-            ])->save();
-        });
-
-        return $status === Password::PASSWORD_RESET;
+        $user = (new UserService)->getUserByEmail($email);
+        if ($user == false) {
+            return false;
+        }
+        $numaricType = VerificationOtp::getTypeCode($type);
+        $otp_service = (new  OtpService)->verifyOtp($numaricType, $token, $otp);
+        if ($otp_service['success'] == false) {
+            Log::info('False return from Otp Service'. $otp_service['success']);
+            return false;
+        }
+        return (new UserService)->changePassword($user, $password);
     }
 
     /**
@@ -236,4 +234,3 @@ class AuthService extends BaseService
         ];
     }
 }
-
