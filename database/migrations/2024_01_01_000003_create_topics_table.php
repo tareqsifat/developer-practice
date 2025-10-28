@@ -13,16 +13,14 @@ return new class extends Migration
     {
         Schema::create('topics', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('subject_id')->constrained('subjects')->onDelete('cascade');
             $table->string('name');
             $table->text('description')->nullable();
             $table->boolean('is_active')->default(true);
             $table->integer('sort_order')->default(0);
             $table->timestamps();
             $table->softDeletes();
-            
-            $table->unique(['subject_id', 'name']);
-            $table->index(['subject_id', 'is_active', 'sort_order']);
+
+            $table->index(['is_active', 'sort_order']);
         });
     }
 
