@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreSubjectRequest;
 use App\Http\Requests\UpdateSubjectRequest;
 use App\Models\Subject;
+use Illuminate\Support\Facades\Log;
 
 class SubjectController extends Controller
 {
@@ -35,7 +36,9 @@ class SubjectController extends Controller
 
     public function destroy($id)
     {
-        Subject::findOrFail($id)->delete();
+        $subject = Subject::findOrFail($id);
+        Log::info('Deleting subject: ', ['subject_id' => $id]);
+        $subject->delete();
         return response()->json(null, 204);
     }
 }
