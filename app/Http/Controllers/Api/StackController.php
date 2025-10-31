@@ -11,7 +11,7 @@ class StackController extends Controller
 {
     public function index()
     {
-        return Stack::all();
+        return Stack::get();
     }
 
     public function show($id)
@@ -36,6 +36,6 @@ class StackController extends Controller
     public function destroy($id)
     {
         Stack::findOrFail($id)->delete();
-        return response()->json(null, 204);
+        return response()->json(['message' => 'Stack deleted successfully.'], 204);
     }
 }
