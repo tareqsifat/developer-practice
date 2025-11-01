@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\SendEmailEvent;
+use App\Http\Requests\ForgetPasswordRequest;
 use App\Services\AuthService;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Models\VerificationOtp;
+use App\Services\OtpService;
 use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
@@ -63,18 +67,13 @@ class AuthController extends Controller
     /**
      * Send a password reset link to the user's email.
     */
-    public function forgotPassword(Request $request)
+    public function forgotPassword(ForgetPasswordRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            'email' => 'required|email|exists:users,email',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
-        }
 
         try {
-            $this->authService->sendPasswordResetLink($request->email);
+            $user = User::where('email', $request->email)->first();
+            $verification_otp = (new OtpService)->generateOtp($user, VerificationOtp::PASSWORD_RESET);
+            event(new SendEmailEvent($user, $verification_otp, VerificationOtp::PASSWORD_RESET));
             return response()->json(['message' => 'Password reset link sent successfully.']);
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 400);
