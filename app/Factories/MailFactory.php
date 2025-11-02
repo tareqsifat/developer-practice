@@ -23,12 +23,16 @@ class MailFactory
             case VerificationOtp::EMAIL_VERIFICATION:
                 Log::info("Sending Verification Email");
                 Log::info($verification_otp);
-                $this->mailService->sendVerificationEmail($user, $verification_otp);
+                Log::info("type: " . VerificationOtp::EMAIL_VERIFICATION);
+                $num_type = VerificationOtp::getTypeCode(VerificationOtp::EMAIL_VERIFICATION);
+                $this->mailService->sendVerificationEmail($user, $verification_otp, $num_type);
                 Log::info("Verification Email Sent");
                 break;
 
             case VerificationOtp::PASSWORD_RESET:
-                $this->mailService->sendPasswordResetEmail($user, $verification_otp);
+                Log::info("type: " . VerificationOtp::PASSWORD_RESET);
+                $num_type = VerificationOtp::getTypeCode(VerificationOtp::PASSWORD_RESET);
+                $this->mailService->sendPasswordResetEmail($user, $verification_otp, $num_type);
                 Log::info("password_reset Email Sent");
                 break;
 
