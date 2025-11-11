@@ -3,39 +3,47 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 use App\Http\Requests\StoreTopicRequest;
 use App\Http\Requests\UpdateTopicRequest;
-use App\Models\Topic;
+use App\Services\TopicService;
 
 class TopicController extends Controller
 {
+    protected $topicService;
+
+    public function __construct(TopicService $topicService)
+    {
+        $this->topicService = $topicService;
+    }
+
     public function index()
     {
-        return Topic::with('subject')->get();
+        $result = $this->topicService->getAll();
+        return response()->json($result);
     }
 
     public function show($id)
     {
-        return Topic::with('subject')->findOrFail($id);
+        $result = $this->topicService->getById($id);
+        return response()->json($result, $result['success'] ? 200 : 404);
     }
 
-    // Admin methods
     public function store(StoreTopicRequest $request)
     {
-        $topic = Topic::create($request->validated());
-        return response()->json($topic, 201);
+        $result = $this->topicService->create($request->validated());
+        return response()->json($result, $result['success'] ? 201 : 400);
     }
 
     public function update(UpdateTopicRequest $request, $id)
     {
-        $topic = Topic::findOrFail($id);
-        $topic->update($request->validated());
-        return $topic;
+        $result = $this->topicService->update($id, $request->validated());
+        return response()->json($result, $result['success'] ? 200 : 400);
     }
 
     public function destroy($id)
     {
-        Topic::findOrFail($id)->delete();
-        return response()->json(null, 204);
+        $result = $this->topicService->delete($id);
+        return response()->json($result, $result['success'] ? 204 : 404);
     }
 }
