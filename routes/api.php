@@ -81,12 +81,10 @@ Route::middleware('auth:api')->group(function () {
 
     // Questions
     Route::apiResource('questions', QuestionController::class);
-    Route::post('questions/{id}/approve', [QuestionController::class, 'approve'])->middleware('can:approve-questions');
-    Route::post('questions/{id}/reject', [QuestionController::class, 'reject'])->middleware('can:approve-questions');
+    Route::post('questions/{id}/approve', [QuestionController::class, 'approve']);
+    Route::post('questions/{id}/reject', [QuestionController::class, 'reject']);
 
     // Exams
-    Route::get('exams', [ExamController::class, 'index']);
-    Route::get('exams/{id}', [ExamController::class, 'show']);
     Route::post('exams/{id}/attempts', [ExamAttemptController::class, 'start']);
     Route::get('exam-attempts/{id}', [ExamAttemptController::class, 'show']);
     Route::post('exam-attempts/{id}/submit', [ExamAttemptController::class, 'submit']);
@@ -139,10 +137,10 @@ Route::middleware('auth:api')->group(function () {
         Route::apiResource('subjects', SubjectController::class);
 
         // Topic management
-        Route::apiResource('topics', TopicController::class)->except(['index', 'show']);
+        Route::apiResource('topics', TopicController::class);
 
         // Exam management
-        Route::apiResource('exams', ExamController::class)->except(['index', 'show']);
+        Route::apiResource('exams', ExamController::class);
 
         // User management
         Route::get('users', [UserController::class, 'index']);
