@@ -79,10 +79,7 @@ Route::middleware('auth:api')->group(function () {
     Route::get('topics', [TopicController::class, 'index']);
     Route::get('topics/{id}', [TopicController::class, 'show']);
 
-    // Questions
-    Route::apiResource('questions', QuestionController::class);
-    Route::post('questions/{id}/approve', [QuestionController::class, 'approve']);
-    Route::post('questions/{id}/reject', [QuestionController::class, 'reject']);
+
 
     // Exams
     Route::post('exams/{id}/attempts', [ExamAttemptController::class, 'start']);
