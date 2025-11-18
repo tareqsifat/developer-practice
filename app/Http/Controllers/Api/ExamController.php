@@ -18,7 +18,8 @@ class ExamController extends Controller
 
     public function index()
     {
-        $result = $this->examService->getAll();
+        $filters = request()->all();
+        $result = $this->examService->getAll($filters);
         return response()->json($result);
     }
 
