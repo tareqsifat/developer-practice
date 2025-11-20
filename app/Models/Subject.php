@@ -24,14 +24,14 @@ class Subject extends Model
         'order' => 'integer',
     ];
 
-    public function stack()
+    public function subjects()
     {
-        return $this->belongsTo(Stack::class);
+        return $this->belongsToMany(Subject::class);
     }
 
     public function topics()
     {
-        return $this->hasMany(Topic::class);
+        return $this->belongsToMany(Topic::class);
     }
 
     public function questions()
