@@ -139,6 +139,14 @@ Route::middleware('auth:api')->group(function () {
         // Exam management
         Route::apiResource('exams', ExamController::class);
 
+        // Questions
+        Route::apiResource('questions', QuestionController::class);
+        Route::post('questions/{id}/approve', [QuestionController::class, 'approve']);
+        Route::post('questions/{id}/reject', [QuestionController::class, 'reject']);
+        // Question management
+        Route::get('questions/pending', [QuestionController::class, 'pending']);
+        Route::get('questions/rejected', [QuestionController::class, 'rejected']);
+
         // User management
         Route::get('users', [UserController::class, 'index']);
         Route::get('users/{id}', [UserController::class, 'show']);
@@ -147,9 +155,7 @@ Route::middleware('auth:api')->group(function () {
         Route::post('users/{id}/activate', [UserController::class, 'activate']);
         Route::post('users/{id}/deactivate', [UserController::class, 'deactivate']);
 
-        // Question management
-        Route::get('questions/pending', [QuestionController::class, 'pending']);
-        Route::get('questions/rejected', [QuestionController::class, 'rejected']);
+
 
         // Feedback management
         Route::get('feedback', [FeedbackController::class, 'index']);
